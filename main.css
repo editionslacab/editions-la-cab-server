@@ -1,0 +1,480 @@
+@font-face {
+    font-family: 'Jost*';
+    src: url('../font/Jost-500-Medium.woff2') format('woff2'),
+         url('../font/Jost-500-Medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+     font-family: 'Jost*';
+    src: url('../font/Jost-500-MediumItalic/woff2') format('woff2'),
+         url('../font/Jost-500-MediumItalic.woff') format('woff');
+    font-weight: 500;
+    font-style: italic;
+}
+   
+
+@font-face {
+     font-family: 'Jost*';
+    src: url('../font/Jost-300-Light.woff2') format('woff2'),
+         url('../font/Jost-300-Light.woff') format('woff');
+    font-weight: 300;
+    font-style: normal;
+}
+   
+@font-face {
+     font-family: 'Jost*';
+    src: url('../font/Jost-300-LightItalic.woff2') format('woff2'),
+         url('../font/Jost-300-LightItalic.woff') format('woff');
+    font-weight: 300;
+    font-style: italic;
+}
+
+html {
+    background: transparent;
+    -webkit-font-smoothing: antialiased;
+    cursor: url(/images/souris.cur), url(/images/souris.png), default;
+}
+
+
+
+body { 
+    background-color: 	#F0F0F0;
+    background-size: auto;
+    background-position: center;
+    cursor: url(/images/souris.cur), url(/images/souris.png), default;
+}
+
+#background{
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    z-index: -10;
+}
+
+
+#background video{
+  object-fit: cover;
+}
+
+
+h1 {
+    cursor: url(/images/souris.cur), url(/images/souris.png), default;
+    font-family: 'Jost*';
+    font-weight: 500;
+  color:black;
+  font-size: 6vw;
+  text-align: center;
+}
+
+
+h1:hover{
+    cursor: url(/images/souris.cur), url(/images/souris.png), default;
+  filter: invert(1);
+}
+
+h2 {
+    cursor: url(/images/souris.cur), url(/images/souris.png), default;
+    color:black;
+    font-size: 175%;
+    font-family: 'Jost*'; 
+    font-weight: 500;
+    font-style: normal;
+    position: fixed;
+    top: 2%;
+    z-index: 10;
+    margin-left: 1%;
+   }
+
+h3{
+    cursor: url(/images/souris.cur), url(/images/souris.png), default;
+    color: black;
+    font-size: 100%;
+    font-family: 'Jost*';
+    font-weight: 200;
+    font-style: normal;
+    text-align: left;
+    margin-top: 2%;
+    margin-left: 1%;
+}
+
+p {
+    cursor: url(/images/souris.cur), url(/images/souris.png), default;
+    color: black;
+    font-family: 'Jost*';
+    font-weight: 200;
+    font-size: 100%;
+    margin-right: 50%;
+    margin-left: 1%;
+
+}
+
+#image1 {
+    cursor: url(/images/souris.cur), url(/images/souris.png), default;
+    float: right;
+    height: 88vh;
+} 
+
+.cycle-slideshow {
+    cursor: url(/images/souris.cur), url(/images/souris.png), default;
+    margin-right: 8%;
+    float: right;
+}
+
+.cycle-slideshow img {
+    height: 88vh;
+ margin-right: 8%;
+        float: right;
+
+}
+
+.cycle-prev{
+ cursor: url(/images/left.cur), url(/images/left.png), default;    
+ position: absolute;
+    top: 0;
+    width: 45%;
+    opacity: 0;
+    filter: alpha(opacity=0);
+    z-index: 800;
+    height: 100%;
+}
+
+.cycle-next{
+    cursor: url(/images/right.cur), url(/images/right.png), default;
+   right: 0;
+     position: absolute;
+    top: 0;
+    width: 45%;
+    opacity: 0;
+    filter: alpha(opacity=0);
+    z-index: 800;
+    height: 100%;
+}
+
+
+#title {
+    cursor: url(/images/souris.cur), url(/images/souris.png), default;
+    font-weight: normal;
+    font-size: 160%;
+}
+
+
+#brieuc {
+    cursor: url(/images/souris.cur), url(/images/souris.png), default;
+        left: 2%;
+
+}
+
+#propos {
+   cursor: ursor: url(/images/souris.cur), url(/images/souris.png), default;
+       right: 2%;
+ 
+}
+
+#fieldwave{
+    cursor: url(/images/souris.cur), url(/images/souris.png), default;
+    padding-top: 40px;
+      margin: 4% 35%; 
+}
+
+#jersey {
+    cursor: url(/images/souris.cur), url(/images/souris.png), default;
+      margin: 4% 26%; 
+}
+    
+#researth {
+  cursor: url(/images/souris.cur), url(/images/souris.png), default;
+      margin: 4% 37%; 
+}
+
+#mouvement {
+  cursor: url(/images/souris.cur), url(/images/souris.png), default;
+      margin: 4% 20%; 
+}
+
+#agon {
+    cursor: url(/images/souris.cur), url(/images/souris.png), default;
+      margin: 4% 41%; 
+     margin-bottom: 15%;
+}
+
+
+
+
+#profilpic{
+    cursor: url(/images/souris.cur), url(/images/souris.png), default;
+    position: sticky;
+    margin-right: 30px;
+    filter: invert(1) blur(20px);
+}
+
+#profilpic:hover{
+    cursor: url(/images/souris.cur), url(/images/souris.png), default;
+    filter: blur(0px);
+    animation-name: spin;
+  animation-duration: 2.5s;
+     animation-direction: alternate;
+    animation-iteration-count: 1;
+    animation-fill-mode: initial;
+}
+  
+
+@keyframes spin {
+  from {transform: rotate3d(0, 0, 0deg);filter: invert(1);}
+      to{transform:rotate3d(1, 0, 1, 360deg); filter: invert(0);}
+}
+
+
+#accueil { 
+    cursor: url(/images/souris.cur), url(/images/souris.png), default;
+    position: static;
+    margin-right: 90%;
+    margin-bottom: 3%;
+}
+
+
+#mail{
+    cursor: url(/images/souris.cur), url(/images/souris.png), default;
+    margin-right: 95%;
+
+}
+
+#instagram{
+   cursor: url(/images/souris.cur), url(/images/souris.png), default;
+    margin-right: 90%;   
+}
+
+
+#tumblr{
+   cursor: url(/images/souris.cur), url(/images/souris.png), default;
+    margin-right: 95%;   
+}
+
+#soundcloud {
+    cursor: url(/images/souris.cur), url(/images/souris.png), default;
+    margin-right: 90%;
+    
+}
+
+#lacab{
+   cursor: url(/images/souris.cur), url(/images/souris.png), default;
+    margin-right: 80vh;
+    margin-bottom: 3%;
+}
+
+#copyright {
+    cursor: url(/images/souris.cur), url(/images/souris.png), default;
+    font-size: 13px;
+    position: absolute;
+}
+
+
+#propos:hover{
+    cursor: url(/images/souris.cur), url(/images/souris.png), default;
+    filter:drop-shadow(2px 2px 2px yellow);
+    font-style: italic;
+}
+
+
+#accueil:hover{ 
+    cursor: url(/images/souris.cur), url(/images/souris.png), default;
+    filter:drop-shadow(2px 2px 2px yellow);
+    font-style: italic;
+}
+
+
+#mail:hover{
+    cursor: url(/images/souris.cur), url(/images/souris.png), default;
+    filter:drop-shadow(2px 2px 2px green);
+    font-style: italic;
+    margin-right: 97%;
+}
+
+#instagram:hover{
+    cursor: url(/images/souris.cur), url(/images/souris.png), default;
+    filter:drop-shadow(2px 2px 2px Fuchsia);
+    font-style: italic;
+}
+
+#tumblr:hover{
+   cursor: url(/images/souris.cur), url(/images/souris.png), default;
+    filter:drop-shadow(2px 2px 2px blue);
+    font-style: italic;
+}
+
+#soundcloud:hover{
+    cursor: url(/images/clic.cur), url(/images/clic.png), default;
+    filter:drop-shadow(2px 2px 2px orange);
+    font-style: italic;
+}
+
+#lacab:hover{
+    cursor: url(/images/souris.cur), url(/images/souris.png), default;
+    filter:drop-shadow(2px 2px 2px crimson);
+    font-style: italic;
+}
+
+#fisheye:hover{
+   cursor: url(/images/souris.cur), url(/images/souris.png), default;
+    filter:drop-shadow(2px 2px 2px yellow);
+    font-style: italic;
+}
+
+a:link {
+    cursor: url(/images/souris.cur), url(/images/souris.png), default;
+  color: black;
+    text-decoration: none;
+}
+
+a:visited {
+    cursor: url(/images/souris.cur), url(/images/souris.png), default;
+  color: black;
+    text-decoration: none;
+}
+
+.visible {
+  display: block;
+}
+
+.hidden {
+  display: none;
+}
+
+
+::-moz-selection {
+  color: #FF0000;
+}
+
+::selection {
+  color: #FF0000;
+}
+
+
+@media all and (max-width: 1024px) and (orientation : portrait) {
+    	
+
+
+body {
+    display:flex;
+    flex-flow:column;
+    background-color: #F0F0F0;
+  }
+    
+
+    
+ .cycle-slideshow {
+    order: 2;
+    float: none;
+    display:block;
+    margin:1%;
+    height:64vh;
+    }
+
+
+#image1 {
+     height: 64vh;
+    } 
+    
+	h1{
+        font-size: 10vw;
+		text-align: left;
+        margin-left: 1%;
+        margin-right: 0%;
+        margin-top: 3%;
+        order: 4;
+
+	}
+    
+    h1:hover{
+  filter: none;
+  }
+ 
+    h2 {
+        font-size: 10vw;
+    position: static;
+        order: 1;
+   }
+    
+    
+    h3 {
+        display:block;
+     font-size: 4vw;
+        order: 2;
+      position: static;
+        text-align:left;
+        margin-right: 2%;
+    }
+    
+    p {
+        font-size: 4vw;
+     position: static;
+        text-align: left;
+        order: 3;
+        margin-right: 2%;
+    }
+    
+    #title {
+        font-size: 8vw;
+        text-align: left;
+        order: 3;
+        margin-right: 2%;
+    }
+    
+    #profilpic {
+     display: none;
+   }
+    
+#fieldwave {
+    
+padding-top: 40px;
+margin-left: 1%; 
+margin-right: 1%;
+}
+    
+#jersey {
+    
+
+   margin-left: 1%; 
+    margin-right: 1%;
+}
+    
+#researth {
+     margin-left: 1%;
+        margin-right: 1%;
+
+}
+
+#mouvement {
+     margin-right: 1%;
+      margin-left: 1%; 
+}
+
+#agon {
+       margin-right: 1%;
+       margin-left: 1%;  
+}
+
+
+    
+ #propos:hover{
+  filter: none;
+  font-style: normal;
+}
+     #accueil:hover{
+  filter: none;
+  font-style: normal;
+}
+
+    
+  #copyright{
+      font-size: 2vw;
+    position: inherit;
+        margin-bottom: 2%;
+    }
+
+#background video{
+  display: none;
+}

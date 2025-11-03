@@ -1,0 +1,11 @@
+{
+  "type": "module",
+  "dependencies": {
+    "express": "^5.1.0",
+    "stripe": "^19.2.0",
+    "cors": "^2.8.5"
+  },
+  "scripts": {
+    "start": "node server.js"
+  }
+}
