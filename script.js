@@ -118,11 +118,11 @@ if (checkoutButton) {
   checkoutButton.addEventListener("click", async () => {
     if (cart.length === 0) return alert("Votre panier est vide.");
     try {
-      const response = await fetch("http://localhost:3000/create-checkout-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: cart }),
-      });
+      const response = await fetch("https://editions-la-cab-server.onrender.com/create-checkout-session", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ items: cart }),
+});
       const session = await response.json();
       if (session.id) await stripe.redirectToCheckout({ sessionId: session.id });
       else alert("Erreur lors de la création de la session Stripe.");

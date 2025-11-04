@@ -4,15 +4,22 @@ import Stripe from "stripe";
 import cors from "cors";
 
 const app = express();
-app.use(cors());
+
+// ✅ Autorise uniquement ton site OVH à appeler ton serveur
+app.use(cors({
+  origin: "https://www.editionslacab.com",
+  methods: ["GET", "POST"],
+}));
+
 app.use(express.json());
 
-// === METS ICI TA CLE SECRETE STRIPE ===
-const stripe = new Stripe("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"); // <-- Ta clé secrète
+// ✅ Clé secrète Stripe (vient de Render)
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-// Route pour créer la session Stripe
+// ✅ Route Stripe Checkout
 app.post("/create-checkout-session", async (req, res) => {
   console.log("Requête reçue :", req.body);
+
   try {
     const { items } = req.body;
 
@@ -20,33 +27,34 @@ app.post("/create-checkout-session", async (req, res) => {
       return res.status(400).json({ error: "Panier vide" });
     }
 
-    // Préparation des produits pour Stripe
     const line_items = items.map(item => ({
       price_data: {
         currency: "eur",
         product_data: { name: item.name },
-        unit_amount: item.price, // en centimes
+        unit_amount: item.price,
       },
       quantity: item.quantity,
     }));
 
-    // Création de la session Stripe
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items,
       mode: "payment",
-      success_url: "http://localhost:3000/success.html",
-      cancel_url: "http://localhost:3000/cancel.html",
+
+      // ✅ Pages de redirection en ligne
+      success_url: "https://www.editionslacab.com/success.html",
+      cancel_url: "https://www.editionslacab.com/cancel.html",
     });
 
     res.json({ id: session.id });
-  } catch (err) {
-    console.error("Erreur Stripe :", err);
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    console.error("Erreur Stripe :", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
-// Démarrage du serveur
-app.listen(3000, () => {
-  console.log("Server running on port 3000");
+// ✅ Port fourni automatiquement par Render
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log("✅ Serveur Stripe en ligne sur le port " + PORT);
 });
