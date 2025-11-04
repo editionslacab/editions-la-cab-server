@@ -5,15 +5,16 @@ import cors from "cors";
 
 const app = express();
 
-// ✅ Autorise uniquement ton site OVH à appeler ton serveur
+// ✅ Autorise ton site OVH à communiquer avec ton API Render
 app.use(cors({
-  origin: "https://www.editionslacab.com",
+  origin: ["https://www.editionslacab.com"],
   methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type"],
 }));
 
 app.use(express.json());
 
-// ✅ Clé secrète Stripe (vient de Render)
+// ✅ Clé secrète Stripe (Render)
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // ✅ Route Stripe Checkout
@@ -40,8 +41,6 @@ app.post("/create-checkout-session", async (req, res) => {
       payment_method_types: ["card"],
       line_items,
       mode: "payment",
-
-      // ✅ Pages de redirection en ligne
       success_url: "https://www.editionslacab.com/success.html",
       cancel_url: "https://www.editionslacab.com/cancel.html",
     });
@@ -53,7 +52,7 @@ app.post("/create-checkout-session", async (req, res) => {
   }
 });
 
-// ✅ Port fourni automatiquement par Render
+// ✅ Port Render
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("✅ Serveur Stripe en ligne sur le port " + PORT);
