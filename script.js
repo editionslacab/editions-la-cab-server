@@ -17,7 +17,9 @@ const products = [
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 let total = 0;
 
-function saveCart() { localStorage.setItem("cart", JSON.stringify(cart)); }
+function saveCart() {
+  localStorage.setItem("cart", JSON.stringify(cart));
+}
 
 function addToCart(name, price) {
   const existing = cart.find(i => i.name === name);
@@ -119,8 +121,6 @@ window.addEventListener("DOMContentLoaded", () => {
   checkoutButton.addEventListener("click", async () => {
     if (cart.length === 0) return alert("Votre panier est vide.");
 
-    console.log("Cart envoyé à Stripe :", cart);
-
     try {
       const response = await fetch("https://editions-la-cab-server.onrender.com/create-checkout-session", {
         method: "POST",
@@ -135,7 +135,6 @@ window.addEventListener("DOMContentLoaded", () => {
       });
 
       const session = await response.json();
-      console.log("Réponse serveur :", session);
 
       if (session.id) await stripe.redirectToCheckout({ sessionId: session.id });
       else alert("Erreur lors de la création de la session Stripe : " + (session.error || "Inconnue"));

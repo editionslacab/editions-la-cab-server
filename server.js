@@ -1,27 +1,33 @@
+// ---------------------------
+// server.js
+// ---------------------------
 import express from "express";
 import Stripe from "stripe";
 import cors from "cors";
 
 const app = express();
 
-// ✅ CORS : autorise ton site
+// ✅ Autorise ton site à communiquer avec ton API Render
 app.use(cors({
   origin: ["https://www.editionslacab.com", "https://editionslacab.com"],
   methods: ["GET", "POST", "OPTIONS"],
   allowedHeaders: ["Content-Type"],
 }));
 
+// ✅ Permet à Express de traiter le JSON
 app.use(express.json());
 
-// ✅ Clé secrète Stripe
+// ✅ Clé secrète Stripe (Render Environment Variable)
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-// ✅ Gère explicitement les requêtes OPTIONS
+// ✅ Gère explicitement les requêtes OPTIONS pour tous les endpoints
 app.options("*", cors());
 
-// ✅ Route Stripe Checkout
+// ---------------------------
+// Route Stripe Checkout
+// ---------------------------
 app.post("/create-checkout-session", async (req, res) => {
-  console.log("POST reçu :", req.body); // DEBUG
+  console.log("Requête reçue :", req.body);
 
   try {
     const { items } = req.body;
@@ -34,7 +40,7 @@ app.post("/create-checkout-session", async (req, res) => {
       price_data: {
         currency: "eur",
         product_data: { name: item.name },
-        unit_amount: Number(item.price),
+        unit_amount: Number(item.price), // montant en centimes
       },
       quantity: Number(item.quantity),
     }));
@@ -48,13 +54,16 @@ app.post("/create-checkout-session", async (req, res) => {
     });
 
     res.json({ id: session.id });
+
   } catch (error) {
-    console.error("Erreur Stripe :", error); // DEBUG
+    console.error("Erreur Stripe :", error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// ✅ Port Render
+// ---------------------------
+// Lancement du serveur
+// ---------------------------
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("✅ Serveur Stripe en ligne sur le port " + PORT);
