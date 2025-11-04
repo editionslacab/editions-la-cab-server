@@ -22,7 +22,7 @@ function saveCart() { localStorage.setItem("cart", JSON.stringify(cart)); }
 function addToCart(name, price) {
   const existing = cart.find(i => i.name === name);
   if (existing) existing.quantity += 1;
-  else cart.push({ name, price, quantity: 1 });
+  else cart.push({ name, price: Number(price), quantity: 1 });
   saveCart();
   renderCart();
 }
@@ -74,7 +74,6 @@ window.addEventListener("DOMContentLoaded", () => {
 function renderProduct(product) {
   const container = document.getElementById(product.container);
   if (!container) return;
-
   const div = document.createElement("div");
   div.style.textAlign = "center";
   div.style.margin = "10px";
@@ -111,24 +110,38 @@ if (openBtn && modal && closeBtn) {
 // ---------------------------
 // STRIPE CHECKOUT
 // ---------------------------
-const stripe = Stripe("pk_live_51M2vLaDzNoL5GslX1wACazqTdZ0gnzctdcP4Sp94I3e4DRncElrSKuAw0BsqfjYLYLTQIO9buU8LhhTxDAPMWQBy00lJUBSINI"); // <-- Ta clé publique
+const stripe = Stripe("pk_live_51M2vLaDzNoL5GslX1wACazqTdZ0gnzctdcP4Sp94I3e4DRncElrSKuAw0BsqfjYLYLTQIO9buU8LhhTxDAPMWQBy00lJUBSINI");
 
-const checkoutButton = document.getElementById("checkout-button");
-if (checkoutButton) {
+window.addEventListener("DOMContentLoaded", () => {
+  const checkoutButton = document.getElementById("checkout-button");
+  if (!checkoutButton) return;
+
   checkoutButton.addEventListener("click", async () => {
     if (cart.length === 0) return alert("Votre panier est vide.");
+
+    console.log("Cart envoyé à Stripe :", cart);
+
     try {
       const response = await fetch("https://editions-la-cab-server.onrender.com/create-checkout-session", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ items: cart }),
-});
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          items: cart.map(i => ({
+            name: i.name,
+            price: Number(i.price),
+            quantity: Number(i.quantity)
+          })) 
+        }),
+      });
+
       const session = await response.json();
+      console.log("Réponse serveur :", session);
+
       if (session.id) await stripe.redirectToCheckout({ sessionId: session.id });
-      else alert("Erreur lors de la création de la session Stripe.");
+      else alert("Erreur lors de la création de la session Stripe : " + (session.error || "Inconnue"));
     } catch (err) {
       console.error(err);
       alert("Erreur réseau ou serveur.");
     }
   });
-}
+});
