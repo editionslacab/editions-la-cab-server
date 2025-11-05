@@ -8,6 +8,7 @@ const products = [
   { name: "Djgerard", price: 800, stock: false, container: "buydjgerard" },
   { name: "La Nuit, Tu Mens", price: 2500, stock: true, container: "buyambre" },
   { name: "On est venus ici pour la vue", price: 3500, stock: true, container: "buypautom" },
+    { name: "test", price: 100, stock: true, container: "buytest" },
   { name: "1h1km", price: 1800, stock: false, container: "buyalan" }
 ];
 
@@ -132,7 +133,7 @@ if (openBtn && modal && closeBtn) {
 // ---------------------------
 // STRIPE CHECKOUT
 // ---------------------------
-const stripe = Stripe("pk_live_51M2vLaDzNoL5G...REMPLACE_Ici");
+const stripe = Stripe("pk_live_51M2vLaDzNoL5GslX1wACazqTdZ0gnzctdcP4Sp94I3e4DRncElrSKuAw0BsqfjYLYLTQIO9buU8LhhTxDAPMWQBy00lJUBSINI");
 
 const checkoutButton = document.getElementById("checkout-button");
 
