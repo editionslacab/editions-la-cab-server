@@ -5,7 +5,7 @@ import cors from "cors";
 const app = express();
 
 // -----------------------------
-// ✅ CORS (IMPORTANT pour Render)
+// ✅ CORS
 // -----------------------------
 app.use(
   cors({
@@ -14,10 +14,7 @@ app.use(
     allowedHeaders: ["Content-Type"],
   })
 );
-
-// ✅ Corrige le preflight OPTIONS
 app.options("*", cors());
-
 app.use(express.json());
 
 // -----------------------------
@@ -28,9 +25,28 @@ if (!process.env.STRIPE_SECRET_KEY) {
   process.exit(1);
 }
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2023-10-16",
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2023-10-16" });
+
+// -----------------------------
+// ✅ Liste des pays valides Stripe
+const ALLOWED_COUNTRIES = [
+  "AD","AE","AF","AG","AI","AL","AM","AO","AR","AS","AT","AU","AW","AZ",
+  "BA","BB","BD","BE","BF","BG","BH","BI","BJ","BM","BN","BO","BR","BS",
+  "BT","BW","BY","BZ","CA","CD","CF","CG","CH","CI","CL","CM","CN","CO",
+  "CR","CU","CV","CW","CY","CZ","DE","DJ","DK","DM","DO","DZ","EC","EE",
+  "EG","ER","ES","ET","FI","FJ","FM","FR","GA","GB","GD","GE","GF","GG",
+  "GH","GI","GL","GM","GN","GP","GQ","GR","GT","GU","GW","GY","HK","HN",
+  "HR","HT","HU","ID","IE","IL","IM","IN","IQ","IR","IS","IT","JE","JM",
+  "JO","JP","KE","KG","KH","KI","KM","KN","KP","KR","KW","KZ","LA","LB",
+  "LC","LI","LK","LR","LS","LT","LU","LV","MA","MC","MD","ME","MF","MG",
+  "MH","MK","ML","MM","MN","MO","MP","MQ","MR","MS","MT","MU","MV","MW",
+  "MX","MY","MZ","NA","NC","NE","NG","NI","NL","NO","NP","NR","NU","NZ",
+  "OM","PA","PE","PF","PG","PH","PK","PL","PM","PN","PR","PT","PW","PY","QA",
+  "RE","RO","RS","RU","RW","SA","SB","SC","SD","SE","SG","SH","SI","SK","SL",
+  "SM","SN","SO","SR","SS","ST","SV","SX","SY","SZ","TC","TD","TG","TH",
+  "TN","TO","TR","TT","TV","TZ","UA","UG","US","UY","UZ","VC","VE","VG",
+  "VI","VN","VU","WS","YE","ZA","ZM","ZW"
+];
 
 // -----------------------------
 // ✅ Créer la session Checkout
@@ -43,70 +59,47 @@ app.post("/create-checkout-session", async (req, res) => {
       return res.status(400).json({ error: "Panier vide" });
     }
 
-    // Construire les articles
-    const line_items = items.map((item) => ({
+    // Construction sécurisée des articles
+    const line_items = items.map(item => ({
       price_data: {
         currency: "eur",
-        product_data: {
-          name: item.name,
-        },
-        unit_amount: Number(item.price),
+        product_data: { name: item.name },
+        unit_amount: Math.round(Number(item.price)), // en centimes
       },
-      quantity: Number(item.quantity),
+      quantity: Math.max(1, Number(item.quantity)),
     }));
 
-    // ✅ Crée la session Checkout
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items,
       mode: "payment",
-
       success_url: "https://www.editionslacab.com/success.html",
       cancel_url: "https://www.editionslacab.com/cancel.html",
-
-      shipping_address_collection: {
-        allowed_countries: [
-          "AC","AD","AE","AF","AG","AI","AL","AM","AO","AQ","AR","AS","AT","AU","AW","AX","AZ",
-          "BA","BB","BD","BE","BF","BG","BH","BI","BJ","BL","BM","BN","BO","BQ","BR","BS","BT","BV","BW","BY","BZ",
-          "CA","CC","CD","CF","CG","CH","CI","CK","CL","CM","CN","CO","CR","CU","CV","CW","CX","CY","CZ",
-          "DE","DJ","DK","DM","DO","DZ","EC","EE","EG","EH","ER","ES","ET",
-          "FI","FJ","FK","FM","FO","FR","GA","GB","GD","GE","GF","GG","GH","GI","GL","GM","GN","GP","GQ","GR",
-          "GS","GT","GU","GW","GY","HK","HM","HN","HR","HT","HU","ID","IE","IL","IM","IN","IO","IQ","IR","IS","IT",
-          "JE","JM","JO","JP","KE","KG","KH","KI","KM","KN","KP","KR","KW","KY","KZ","LA","LB","LC","LI","LK","LR","LS","LT","LU","LV","LY",
-          "MA","MC","MD","ME","MF","MG","MH","MK","ML","MM","MN","MO","MP","MQ","MR","MS","MT","MU","MV","MW","MX","MY","MZ",
-          "NA","NC","NE","NF","NG","NI","NL","NO","NP","NR","NU","NZ","OM","PA","PE","PF","PG","PH","PK","PL","PM","PN","PR","PS","PT","PW","PY","QA",
-          "RE","RO","RS","RU","RW","SA","SB","SC","SD","SE","SG","SH","SI","SJ","SK","SL","SM","SN","SO","SR","SS","ST","SV","SX","SY","SZ",
-          "TC","TD","TF","TG","TH"
-        ],
-      },
-
+      shipping_address_collection: { allowed_countries: ALLOWED_COUNTRIES },
       shipping_options: [
-        { shipping_rate: "shr_1SQ71YDzNoL5GslXBZHwg8c5" }, // livraison
-        { shipping_rate: "shr_1SQ7jfDzNoL5GslXr5lJVyDM" }, // retrait
+        { shipping_rate: "shr_1SQ71YDzNoL5GslXBZHwg8c5" },
+        { shipping_rate: "shr_1SQ7jfDzNoL5GslXr5lJVyDM" },
       ],
-
       metadata: {
         note: note || "",
-        items: JSON.stringify(items.map((i) => ({ name: i.name, qty: i.quantity }))),
+        items: JSON.stringify(items.map(i => ({ name: i.name, qty: i.quantity }))),
       },
     });
 
     return res.json({ id: session.id });
+
   } catch (err) {
-    console.error("❌ Erreur Stripe :", err);
+    console.error("❌ Erreur Stripe :", err.message);
+    console.error("❌ Détails complets :", JSON.stringify(err, Object.getOwnPropertyNames(err), 2));
     return res.status(500).json({ error: err.message });
   }
 });
 
 // -----------------------------
 // ✅ Route test
-// -----------------------------
-app.get("/", (req, res) => {
-  res.send("✅ Stripe server running");
-});
+app.get("/", (req, res) => res.send("✅ Stripe server running"));
 
 // -----------------------------
 // ✅ Démarrage serveur
-// -----------------------------
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
