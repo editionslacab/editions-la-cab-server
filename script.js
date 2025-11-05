@@ -24,9 +24,10 @@ function saveCart() {
 function addToCart(name, price) {
   const existing = cart.find(i => i.name === name);
   if (existing) existing.quantity += 1;
-  else cart.push({ name, price: Number(price), quantity: 1 });
+  else cart.push({ name, price, quantity: 1 });
   saveCart();
   renderCart();
+  document.getElementById("cart-modal").style.display = "block"; 
 }
 
 function removeFromCart(name) {
@@ -48,23 +49,29 @@ function updateQuantity(name, quantity) {
 function renderCart() {
   const cartList = document.getElementById("cart");
   if (!cartList) return;
+
   cartList.innerHTML = "";
   total = 0;
+
   cart.forEach(item => {
     total += item.price * item.quantity;
     const li = document.createElement("li");
     li.innerHTML = `
-      ${item.name} 
-      <input type="number" min="1" value="${item.quantity}" onchange="updateQuantity('${item.name}', this.value)">
+      <b>${item.name}</b> — ${(item.price / 100).toFixed(2)}€
+      <button onclick="updateQuantity('${item.name}', ${item.quantity - 1})">-</button>
+      <span>${item.quantity}</span>
+      <button onclick="updateQuantity('${item.name}', ${item.quantity + 1})">+</button>
       <button onclick="removeFromCart('${item.name}')">Supprimer</button>
     `;
     cartList.appendChild(li);
   });
-  const totalElement = document.getElementById("total");
-  if (totalElement) totalElement.textContent = (total / 100).toFixed(2);
+
+  document.getElementById("total").textContent = (total / 100).toFixed(2);
 }
 
-// Recharge panier et produits au chargement
+// ---------------------------
+// CHARGEMENT
+// ---------------------------
 window.addEventListener("DOMContentLoaded", () => {
   renderCart();
   products.forEach(renderProduct);
@@ -76,6 +83,7 @@ window.addEventListener("DOMContentLoaded", () => {
 function renderProduct(product) {
   const container = document.getElementById(product.container);
   if (!container) return;
+
   const div = document.createElement("div");
   div.style.textAlign = "center";
   div.style.margin = "10px";
@@ -93,54 +101,59 @@ function renderProduct(product) {
 // MODALE PANIER
 // ---------------------------
 const modal = document.getElementById("cart-modal");
-const openBtn = document.getElementById("open-cart");
-const closeBtn = document.getElementById("close-cart");
-
-if (openBtn && modal && closeBtn) {
-  openBtn.addEventListener("click", () => {
-    renderCart();
-    modal.style.display = "block";
-  });
-
-  closeBtn.addEventListener("click", () => { modal.style.display = "none"; });
-
-  window.addEventListener("click", (event) => {
-    if (event.target === modal) modal.style.display = "none";
-  });
-}
+document.getElementById("open-cart").onclick = () => modal.style.display = "block";
+document.getElementById("close-cart").onclick = () => modal.style.display = "none";
+window.onclick = (event) => { if (event.target === modal) modal.style.display = "none"; };
 
 // ---------------------------
 // STRIPE CHECKOUT
 // ---------------------------
-const stripe = Stripe("pk_live_51M2vLaDzNoL5GslX1wACazqTdZ0gnzctdcP4Sp94I3e4DRncElrSKuAw0BsqfjYLYLTQIO9buU8LhhTxDAPMWQBy00lJUBSINI");
+const stripe = Stripe("pk_live_**********************"); // ta clé publique
 
-window.addEventListener("DOMContentLoaded", () => {
-  const checkoutButton = document.getElementById("checkout-button");
-  if (!checkoutButton) return;
+document.getElementById("checkout-button").addEventListener("click", async () => {
+  if (cart.length === 0) return alert("Votre panier est vide.");
 
-  checkoutButton.addEventListener("click", async () => {
-    if (cart.length === 0) return alert("Votre panier est vide.");
+  const mode = document.querySelector('input[name="delivery-mode"]:checked');
+  if (!mode) return alert("Choisissez : livraison ou retrait.");
 
-    try {
-      const response = await fetch("https://editions-la-cab-server.onrender.com/create-checkout-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          items: cart.map(i => ({
-            name: i.name,
-            price: Number(i.price),
-            quantity: Number(i.quantity)
-          })) 
-        }),
-      });
+  let address = null;
 
-      const session = await response.json();
+  // Si livraison → vérifier les champs
+  if (mode.value === "delivery") {
+    const street = document.getElementById("addr-street").value;
+    const city = document.getElementById("addr-city").value;
+    const zip = document.getElementById("addr-zip").value;
 
-      if (session.id) await stripe.redirectToCheckout({ sessionId: session.id });
-      else alert("Erreur lors de la création de la session Stripe : " + (session.error || "Inconnue"));
-    } catch (err) {
-      console.error(err);
-      alert("Erreur réseau ou serveur.");
+    if (!street || !city || !zip) {
+      return alert("Veuillez remplir votre adresse.");
     }
-  });
+
+    address = { street, city, zip };
+  }
+
+  const note = document.getElementById("order-note").value || "";
+
+  try {
+    const response = await fetch("https://editions-la-cab-server.onrender.com/create-checkout-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        items: cart,
+        mode: mode.value,
+        address,
+        note
+      }),
+    });
+
+    const session = await response.json();
+
+    if (session.id) {
+      await stripe.redirectToCheckout({ sessionId: session.id });
+    } else {
+      alert("Erreur : " + session.error);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Erreur réseau ou serveur.");
+  }
 });
