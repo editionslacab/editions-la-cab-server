@@ -51,7 +51,7 @@ app.post("/create-checkout-session", async (req, res) => {
       // ✅ OBLIGATOIRE pour voir "Livraison / Retrait" sur Stripe Checkout
       shipping_options: [
         { shipping_rate: "shr_1SQ71YDzNoL5GslXBZHwg8c5" }, // Livraison 7€
-        { shipping_rate: "shr_1SQ73RDzNoL5GslXpcWpUPif" }, // Retrait 0€
+        { shipping_rate: "shr_1SQ7jfDzNoL5GslXr5lJVyDM" }, // Retrait 0€
       ],
 
       // URLs

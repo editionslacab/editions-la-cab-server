@@ -8,7 +8,7 @@ const products = [
   { name: "Djgerard", price: 800, stock: false, container: "buydjgerard" },
   { name: "La Nuit, Tu Mens", price: 2500, stock: true, container: "buyambre" },
   { name: "On est venus ici pour la vue", price: 3500, stock: true, container: "buypautom" },
-  { name: "1h1km", price: 1800, stock: false, container: "buyalan" },
+  { name: "1h1km", price: 1800, stock: false, container: "buyalan" }
 ];
 
 // ---------------------------
@@ -25,6 +25,7 @@ function addToCart(name, price) {
   const existing = cart.find(i => i.name === name);
   if (existing) existing.quantity += 1;
   else cart.push({ name, price, quantity: 1 });
+
   saveCart();
   renderCart();
 }
@@ -35,14 +36,19 @@ function removeFromCart(name) {
   renderCart();
 }
 
-function updateQuantity(name, quantity) {
+function changeQuantity(name, delta) {
   const item = cart.find(i => i.name === name);
-  if (item) {
-    item.quantity = Number(quantity);
-    if (item.quantity <= 0) removeFromCart(name);
-    saveCart();
-    renderCart();
+  if (!item) return;
+
+  item.quantity += delta;
+
+  if (item.quantity <= 0) {
+    removeFromCart(name);
+    return;
   }
+
+  saveCart();
+  renderCart();
 }
 
 function renderCart() {
@@ -57,11 +63,15 @@ function renderCart() {
 
     const li = document.createElement("li");
     li.innerHTML = `
-      ${item.name}
-      <input type="number" min="1" value="${item.quantity}"
-        onchange="updateQuantity('${item.name}', this.value)">
-      <button onclick="removeFromCart('${item.name}')">Supprimer</button>
+      <strong>${item.name}</strong><br>
+
+      <button onclick="changeQuantity('${item.name}', -1)">−</button>
+      <span style="padding:0 10px;">${item.quantity}</span>
+      <button onclick="changeQuantity('${item.name}', +1)">+</button>
+
+      <button onclick="removeFromCart('${item.name}')" style="margin-left:10px;">Supprimer</button>
     `;
+
     cartList.appendChild(li);
   });
 
@@ -69,7 +79,7 @@ function renderCart() {
   if (totalElement) totalElement.textContent = (total / 100).toFixed(2);
 }
 
-// Recharge panier et produits
+// Recharge panier au démarrage
 window.addEventListener("DOMContentLoaded", () => {
   renderCart();
   products.forEach(renderProduct);
@@ -87,24 +97,18 @@ function renderProduct(product) {
   div.style.margin = "10px";
 
   if (product.stock) {
-    div.innerHTML = `
-      <button class="buy" onclick="addToCart('${product.name}', ${product.price})">
-        Ajouter au panier
-      </button>
-    `;
+    div.innerHTML =
+      `<button class="buy" onclick="addToCart('${product.name}', ${product.price})">Ajouter au panier</button>`;
   } else {
-    div.innerHTML = `
-      <button class="buy" disabled>
-        <span style="text-decoration: line-through; color:#777;">Sold out</span>
-      </button>
-    `;
+    div.innerHTML =
+      `<button class="buy" disabled><span style="text-decoration: line-through; color:#777;">Sold out</span></button>`;
   }
 
   container.appendChild(div);
 }
 
 // ---------------------------
-// MODALE PANIER
+// MODALE
 // ---------------------------
 const modal = document.getElementById("cart-modal");
 const openBtn = document.getElementById("open-cart");
@@ -128,20 +132,13 @@ if (openBtn && modal && closeBtn) {
 // ---------------------------
 // STRIPE CHECKOUT
 // ---------------------------
-const stripe = Stripe("pk_live_51M2vLaDzNoL5GslX1wACazqTdZ0gnzctdcP4Sp94I3e4DRncElrSKuAw0BsqfjYLYLTQIO9buU8LhhTxDAPMWQBy00lJUBSINI");
+const stripe = Stripe("pk_live_51M2vLaDzNoL5G...REMPLACE_Ici");
 
 const checkoutButton = document.getElementById("checkout-button");
 
 if (checkoutButton) {
   checkoutButton.addEventListener("click", async () => {
-    
-    if (cart.length === 0) {
-      return alert("Votre panier est vide.");
-    }
-
-    // ✅ Récupérer la note de commande
-    const noteField = document.getElementById("order-note");
-    const note = noteField ? noteField.value : "";
+    if (cart.length === 0) return alert("Votre panier est vide.");
 
     try {
       const response = await fetch("https://editions-la-cab-server.onrender.com/create-checkout-session", {
@@ -149,7 +146,7 @@ if (checkoutButton) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           items: cart,
-          note: note
+          note: "" // tu pourras ajouter une zone de note plus tard
         }),
       });
 
