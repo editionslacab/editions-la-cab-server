@@ -30,22 +30,14 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2023-10-
 // -----------------------------
 // ✅ Liste des pays valides Stripe
 const ALLOWED_COUNTRIES = [
-  "AD","AE","AF","AG","AI","AL","AM","AO","AR","AS","AT","AU","AW","AZ",
-  "BA","BB","BD","BE","BF","BG","BH","BI","BJ","BM","BN","BO","BR","BS",
-  "BT","BW","BY","BZ","CA","CD","CF","CG","CH","CI","CL","CM","CN","CO",
-  "CR","CU","CV","CW","CY","CZ","DE","DJ","DK","DM","DO","DZ","EC","EE",
-  "EG","ER","ES","ET","FI","FJ","FM","FR","GA","GB","GD","GE","GF","GG",
-  "GH","GI","GL","GM","GN","GP","GQ","GR","GT","GU","GW","GY","HK","HN",
-  "HR","HT","HU","ID","IE","IL","IM","IN","IQ","IR","IS","IT","JE","JM",
-  "JO","JP","KE","KG","KH","KI","KM","KN","KP","KR","KW","KZ","LA","LB",
-  "LC","LI","LK","LR","LS","LT","LU","LV","MA","MC","MD","ME","MF","MG",
-  "MH","MK","ML","MM","MN","MO","MP","MQ","MR","MS","MT","MU","MV","MW",
-  "MX","MY","MZ","NA","NC","NE","NG","NI","NL","NO","NP","NR","NU","NZ",
-  "OM","PA","PE","PF","PG","PH","PK","PL","PM","PN","PR","PT","PW","PY","QA",
-  "RE","RO","RS","RU","RW","SA","SB","SC","SD","SE","SG","SH","SI","SK","SL",
-  "SM","SN","SO","SR","SS","ST","SV","SX","SY","SZ","TC","TD","TG","TH",
-  "TN","TO","TR","TT","TV","TZ","UA","UG","US","UY","UZ","VC","VE","VG",
-  "VI","VN","VU","WS","YE","ZA","ZM","ZW"
+  // Europe (principaux pays)
+  "FR","DE","IT","ES","PT","BE","NL","LU","CH","AT","SE","NO","DK","FI","IE","GB",
+  // USA
+  "US",
+  // Amérique du Sud et Latine
+  "AR","BR","CL","CO","EC","PE","UY","VE","BO","PY","GY","SR","GF",
+  // Asie
+  "JP","CN","TW"
 ];
 
 // -----------------------------
