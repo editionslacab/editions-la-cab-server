@@ -9,15 +9,15 @@ app.use(express.json());
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-// ✅ ROUTE PRINCIPALE : CRÉATION DE LA SESSION CHECKOUT
+// ✅ CRÉATION SESSION STRIPE + ENVOI ZAPIER
 app.post("/create-checkout-session", async (req, res) => {
   try {
     const { items, shippingOption } = req.body;
 
-    // ✅ Création session Stripe
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "payment",
+
       shipping_address_collection: {
         allowed_countries: [
           "FR", "BE", "CH", "DE", "NL", "ES", "IT",
@@ -26,6 +26,7 @@ app.post("/create-checkout-session", async (req, res) => {
           "JP", "CN", "TW"
         ]
       },
+
       line_items: items.map(item => ({
         price_data: {
           currency: "eur",
@@ -51,39 +52,31 @@ app.post("/create-checkout-session", async (req, res) => {
       success_url: "https://www.editions-la-cab.com/success.html",
       cancel_url: "https://www.editions-la-cab.com/cancel.html",
 
-      // ✅ On stocke les infos produit + livraison dans Stripe
       metadata: {
         items: JSON.stringify(items),
         shippingOption: JSON.stringify(shippingOption)
       }
     });
 
-    // ✅ ENVOI DIRECT À ZAPIER CATCH HOOK (GRATUIT)
-    try {
-      await fetch("https://hooks.zapier.com/hooks/catch/25260064/us5cxxh/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sessionId: session.id,
-          items,
-          shippingOption
-        })
-      });
-    } catch (zapErr) {
-      console.error("Erreur envoi Zapier :", zapErr);
-    }
+    // ✅ ENVOI À ZAPIER CATCH HOOK (GRATUIT)
+    await fetch("https://hooks.zapier.com/hooks/catch/25260064/us5cxxh/
+", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sessionId: session.id,
+        items,
+        shippingOption
+      })
+    });
 
-    // ✅ Retourne l’URL Stripe Checkout
     res.json({ url: session.url });
 
   } catch (err) {
-    console.error("Erreur création session Stripe :", err);
-    res.status(500).json({
-      error: "Impossible de créer la session Stripe",
-    });
+    console.error("Erreur Checkout:", err);
+    res.status(500).json({ error: "Erreur Stripe" });
   }
 });
 
-// ✅ Lancer le serveur
 const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`✅ Server running on port ${port}`));
+app.listen(port, () => console.log("✅ Server running on port " + port));
