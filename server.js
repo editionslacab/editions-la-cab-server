@@ -1,89 +1,86 @@
 import express from "express";
 import Stripe from "stripe";
 import cors from "cors";
-import fetch from "node-fetch";
 
 const app = express();
-app.use(cors());
+
+// -----------------------------
+// CORS
+// -----------------------------
+app.use(cors({
+  origin: ["https://editionslacab.com", "https://www.editionslacab.com"],
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type"],
+}));
+app.options("*", cors());
 app.use(express.json());
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+// -----------------------------
+// Stripe
+// -----------------------------
+if (!process.env.STRIPE_SECRET_KEY) {
+  console.error("❌ ERREUR : STRIPE_SECRET_KEY manquante");
+  process.exit(1);
+}
 
-// ✅ ROUTE PRINCIPALE : CRÉATION DE LA SESSION CHECKOUT
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: "2023-10-16",
+});
+
+// -----------------------------
+// Liste des pays
+const ALLOWED_COUNTRIES = [
+  "FR","DE","IT","ES","PT","BE","NL","LU","CH","AT","SE","NO","DK","FI","IE","GB",
+  "US",
+  "AR","BR","CL","CO","EC","PE","UY","VE","BO","PY","GY","SR","GF",
+  "JP","CN","TW"
+];
+
+// -----------------------------
+// Création session Checkout
 app.post("/create-checkout-session", async (req, res) => {
   try {
-    const { items, shippingOption } = req.body;
+    const { items } = req.body;
 
-    // ✅ Création session Stripe
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      mode: "payment",
-      shipping_address_collection: {
-        allowed_countries: [
-          "FR", "BE", "CH", "DE", "NL", "ES", "IT",
-          "US", "CA",
-          "BR", "AR", "MX",
-          "JP", "CN", "TW"
-        ]
-      },
-      line_items: items.map(item => ({
-        price_data: {
-          currency: "eur",
-          product_data: { name: item.name },
-          unit_amount: item.price * 100,
-        },
-        quantity: item.quantity,
-      })),
-
-      shipping_options: [
-        {
-          shipping_rate_data: {
-            type: "fixed_amount",
-            display_name: shippingOption.label,
-            fixed_amount: {
-              amount: shippingOption.price * 100,
-              currency: "eur"
-            }
-          }
-        }
-      ],
-
-      success_url: "https://www.editions-la-cab.com/success.html",
-      cancel_url: "https://www.editions-la-cab.com/cancel.html",
-
-      // ✅ On stocke les infos produit + livraison dans Stripe
-      metadata: {
-        items: JSON.stringify(items),
-        shippingOption: JSON.stringify(shippingOption)
-      }
-    });
-
-    // ✅ ENVOI DIRECT À ZAPIER CATCH HOOK (GRATUIT)
-    try {
-      await fetch("https://hooks.zapier.com/hooks/catch/25260064/us5cxxh/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sessionId: session.id,
-          items,
-          shippingOption
-        })
-      });
-    } catch (zapErr) {
-      console.error("Erreur envoi Zapier :", zapErr);
+    if (!items || !items.length) {
+      return res.status(400).json({ error: "Panier vide" });
     }
 
-    // ✅ Retourne l’URL Stripe Checkout
-    res.json({ url: session.url });
+    const line_items = items.map(item => ({
+      price_data: {
+        currency: "eur",
+        product_data: { name: item.name },
+        unit_amount: Math.round(Number(item.price)),
+      },
+      quantity: Math.max(1, Number(item.quantity)),
+    }));
 
-  } catch (err) {
-    console.error("Erreur création session Stripe :", err);
-    res.status(500).json({
-      error: "Impossible de créer la session Stripe",
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items,
+      mode: "payment",
+      success_url: "https://www.editionslacab.com/success.html",
+      cancel_url: "https://www.editionslacab.com/cancel.html",
+      shipping_address_collection: { allowed_countries: ALLOWED_COUNTRIES },
+      shipping_options: [
+        { shipping_rate: "shr_1SQ71YDzNoL5GslXBZHwg8c5" },
+        { shipping_rate: "shr_1SQ7jfDzNoL5GslXr5lJVyDM" }
+      ]
+      // ⚡ Pas de customer_email, Stripe demandera l'email
     });
+
+    return res.json({ id: session.id });
+  } catch (err) {
+    console.error("❌ Erreur Stripe :", err.message);
+    return res.status(500).json({ error: err.message });
   }
 });
 
-// ✅ Lancer le serveur
-const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`✅ Server running on port ${port}`));
+// -----------------------------
+// Route test
+app.get("/", (req, res) => res.send("✅ Stripe server running"));
+
+// -----------------------------
+// Démarrage serveur
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
