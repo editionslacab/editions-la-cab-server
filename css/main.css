@@ -414,6 +414,15 @@ a.press:hover{
     color: blue;
 }
 
+a.pressvideo{
+    color: blue;
+}
+
+a.pressvideo:hover{
+    color: #696969;
+}
+
+
 .dropbtn{
     color: black;
     font-family: 'robotobold';
