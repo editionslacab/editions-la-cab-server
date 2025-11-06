@@ -119,7 +119,7 @@ if (openBtn && modal) {
 }
 
 // ---------------------------
-// STRIPE CHECKOUT
+// STRIPE CHECKOUT DIRECT
 // ---------------------------
 const stripe = Stripe("pk_live_51M2vLaDzNoL5GslX1wACazqTdZ0gnzctdcP4Sp94I3e4DRncElrSKuAw0BsqfjYLYLTQIO9buU8LhhTxDAPMWQBy00lJUBSINI");
 
@@ -136,7 +136,7 @@ if (checkoutButton) {
       const response = await fetch("https://editions-la-cab-server.onrender.com/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: cart, note: "" })
+        body: JSON.stringify({ items: cart }) // plus de prompt, direct vers Stripe
       });
 
       const data = await response.json();
@@ -157,6 +157,6 @@ if (checkoutButton) {
 // LANCEMENT AU CHARGEMENT
 // ---------------------------
 window.addEventListener("DOMContentLoaded", () => {
-  products.forEach(renderProduct); // ✅ tu utilises bien ton HTML
+  products.forEach(renderProduct);
   renderCart();
 });
